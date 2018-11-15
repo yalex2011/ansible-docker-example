@@ -1,0 +1,35 @@
+---
+
+- name: Create project dir
+  file:
+    path: /home/docker/flask
+    state: directory
+
+- name: Copy Dockerfile Flask
+  copy:
+    src: "{{ item }}"
+    dest: /home/docker/flask/{{ item }}
+    force: true
+  with_items:
+    - app.py
+    - Dockerfile
+    - docker-compose.yml
+    - requirements.txt
+    - pip.conf
+    - deploy-stack.yml
+
+- name: Build an image
+  docker_image:
+    path: /home/docker/flask/
+    name: flask-ansible
+    tag: v1
+    push: no
+    state: present
+
+- name: Build an image latest
+  docker_image:
+    path: /home/docker/flask/
+    name: flask-ansible
+    #tag: v1
+    push: no
+    state: present

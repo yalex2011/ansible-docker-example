@@ -1,0 +1,108 @@
+---
+# Create thin pool for docker
+
+- name: Installed device-mapper-persistent-data
+  yum:
+    name: device-mapper-persistent-data
+    state: installed
+
+ #! Диск должен быть добавлен /dev/sdb - 20GB 
+- name: Create vg
+  lvg:
+    vg: docker
+    pvs: /dev/sdb
+
+- name: Create lv thinpool
+  lvol:
+    vg: docker
+    lv: thinpool
+    opts: '--wipesignatures y'
+    size: 95%VG
+
+- name: Create lv thinpoolmeta
+  lvol:
+    vg: docker
+    lv: thinpoolmeta
+    opts: '--wipesignatures y'
+    size: 1%VG
+
+# - name: lvconvert
+#   shell: lvconvert -y --zero n -c 512K --thinpool /dev/docker/thinpool --poolmetadata /dev/docker/thinpoolmeta
+#   ignore_errors: yes
+#   register: lvcon_result
+
+# - debug:
+#     var: lvcon_result
+
+- name: Stop docker
+  service:
+    name: docker
+    state: stopped
+
+- name: Copy daemon.json
+  become: yes
+  template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    backup: yes
+
+- name: Copy docker-storage
+  template:
+    src: docker-storage.j2
+    dest: /etc/sysconfig/docker-storage
+    backup: yes
+
+# - name: Rename old var/lib/docker
+#   command: "mv /var/lib/docker /var/lib/docker.bk"
+#   ignore_errors: yes
+
+- name: mkdir docker
+  file:
+    path: /var/lib/docker/devicemapper
+    state: directory
+    recurse: yes
+
+# - name: List files in /var/lib/docker/
+#   find:
+#     path: /var/lib/docker
+#     recurse: yes
+#     file_type: any
+#   register: find_result
+
+# - name: Create the directories
+#   file:
+#     path: "{{ item.path }}"
+#     state: directory
+#     mode: "{{ item.mode }}"
+#   with_items:
+#     - "{{ find_result.files }}"
+#   when:
+#     - item.isdir
+
+# - name: Copy the files
+#   copy:
+#     src: "{{ item.path }}"
+#     dest: "{{ item.path }}"
+#     remote_src: yes
+#     mode: "{{ item.mode }}"
+#   with_items:
+#     - "{{ find_result.files }}"
+#   when:
+#     - item.isdir == False
+
+# - name: remove docker vars
+#   copy:
+#     src: /var/lib/docker/
+#     dest: /var/lib/docker.bk/
+#     force: yes
+#     remote_src: yes
+#     directory_mode: yes
+
+- name: Start Docker daemon
+  service:
+    name: docker
+    state: started
+  register: docker_stat
+
+- debug:
+    var: docker_stat

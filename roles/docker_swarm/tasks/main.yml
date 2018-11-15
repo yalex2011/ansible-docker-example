@@ -1,0 +1,42 @@
+---
+# Работа со Swarm
+
+- name: Remove a swarm manager
+  docker_swarm:
+    state: absent
+    force: true
+
+- name: Inspect swarm
+  docker_swarm:
+    state: inspect
+  register: swarm_info
+
+- debug:
+    var: swarm_info
+
+- debug:
+    msg: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+
+- name: Init a new swarm with default parameters
+  docker_swarm:
+    advertise_addr: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+    state: present
+
+- name: Inspect swarm
+  docker_swarm:
+    state: inspect
+  register: swarm_info
+
+- debug:
+    var: swarm_info
+
+
+# API >= 1.29
+# -   name: define myservice
+#     docker_swarm_service:
+#         name: myservice
+#         replicas: 3
+#         image: "flask:latest"
+#         limit_cpu: "0.1"
+#         limit_memory: 50M
+#     register: dss_out1

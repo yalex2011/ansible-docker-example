@@ -1,0 +1,61 @@
+---
+
+- name: Install CentOS local repo
+  get_url:
+    url: http://ltyumrepo.moscow.alfaintra.net/files/localrepo/local.centos.repo
+    dest: /etc/yum.repos.d/local.repo
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_distribution == 'CentOS'
+
+- name: Add local CentOS GPG key.
+  rpm_key:
+    key: http://ltyumrepo.moscow.alfaintra.net/files/localrepo/RPM-GPG-KEY-EPEL-7
+    state: present
+
+- name: Install CentOS Epel local repo
+  get_url:
+    url: http://ltyumrepo.moscow.alfaintra.net/files/localrepo/epel.repo
+    dest: /etc/yum.repos.d/epel.repo
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_distribution == 'CentOS'
+
+- name: Disable default repos
+  file:
+    path: /etc/yum.repos.d/{{ item }}
+    state: absent
+  with_items:
+    - CentOS-Base.repo
+    - CentOS-CR.repo
+    - CentOS-Debuginfo.repo
+    - CentOS-fasttrack.repo
+    - CentOS-Media.repo
+    - CentOS-Sources.repo
+    - CentOS-Vault.repo
+  when: ansible_distribution == 'CentOS'
+
+# tasks for ansible-disable-selinux
+
+- name: SELinux | RedHat | Install libselinux-python
+  yum:
+    name: libselinux-python
+    state: present
+
+- name: SELinux | Set SELinux policy and state
+  selinux:
+    policy: targeted
+    state: enforcing
+  register: selinux
+
+- debug:
+    var: selinux
+
+- name: "Reboot a slow machine that might have lots of updates to apply"
+  reboot:
+    #reboot_timeout: 3600
+    #reboot_required: True
+    post_reboot_delay: 300
+  when: selinux.changed #and reboot

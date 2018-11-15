@@ -1,0 +1,8 @@
+---
+all:
+  hosts:
+    demo:
+      ansible_host: 172.25.178.227
+      #ansible_host: 172.25.178.133
+      ansible_user: root
+      ansible_ssh_pass: qwerty

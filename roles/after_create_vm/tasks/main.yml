@@ -1,0 +1,14 @@
+---
+# tasks file for after_create_vm
+
+- name: Block for Cent
+  block:
+    # - include: lvm.yml
+    - include: redhat.yml
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+# - name: yum update
+#   yum:
+#     name: '*'
+#     state: latest
+#   when: ansible_distribution == 'CentOS'

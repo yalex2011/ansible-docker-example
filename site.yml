@@ -1,0 +1,12 @@
+---
+- hosts: all
+
+  roles:
+    - after_create_vm
+    - install_docker
+    - thin_pool_create
+    - get_docker_image
+    - build_docker_container
+    - docker_swarm
+    - docker_stack_deploy
+    - docker_stack_check

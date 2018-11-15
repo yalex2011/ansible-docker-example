@@ -1,0 +1,20 @@
+---
+
+- name: Wait 300 seconds for port 80 to become open on the host, don't start checking for 10 seconds
+  wait_for:
+    port: 80
+    delay: 10
+
+# Check that a page returns a status 200 and fail if the word AWESOME is not
+# in the page contents.
+- uri:
+    url: http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}
+    return_content: yes
+  register: webpage
+
+- name: Fail if Hello World is not in the page content
+  fail:
+  when: "'Hello World' not in webpage.content"
+
+- debug:
+    msg: "{{ webpage.content }}"

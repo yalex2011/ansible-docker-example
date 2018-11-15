@@ -1,0 +1,33 @@
+---
+# Get Docker image form docker-hub.binary.alfabank.ru
+
+- name: Pull docker image form docker-hub.binary.alfabank.ru
+  docker_image:
+    name: docker-hub.binary.alfabank.ru/centos
+    tag: latest
+    pull: yes
+
+- name: Inspect a single image
+  docker_image_facts:
+    name: docker-hub.binary.alfabank.ru/centos
+
+# - name: Copy local image arhive
+#   copy:
+#     src: flask.tar
+#     dest: /home/flask.tar
+
+# - name: Load image from archive
+#   docker_image:
+#     name: flask
+#     tag: v1
+#     # push: yes
+#     load_path: /home/flask.tar
+#     state: present
+
+# - name: Inspect a local image flask
+#   docker_image_facts:
+#     name: flask
+#   register: result
+
+# - debug:
+#     msg: "{{ result.images }}"

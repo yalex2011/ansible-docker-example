@@ -1,0 +1,24 @@
+---
+
+- set_fact:
+    dev: /dev/sda
+    part: 3
+
+# - name: grow too small partition to maximum
+#   # Request resize, ack resize of partition that is in use (when requested).
+#   # https://bugs.launchpad.net/ubuntu/+source/parted/+bug/1270203
+#   # https://unix.stackexchange.com/a/365657
+#   command: 'parted {{ dev }} resizepart {{ part }} 100%'
+#   ignore_errors: yes
+#   when: max_gap_kb < gap_kb|int
+
+- name: resize part
+  command: 'parted /dev/sda resizepart 3 16,1GB'
+
+- name: Resize lvm /dev/mapper/rhel-var
+  lvol:
+    vg: rhel
+    lv: var
+    size: 100%FREE
+    force: yes
+

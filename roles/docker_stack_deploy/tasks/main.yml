@@ -1,0 +1,26 @@
+---
+
+# only ansible 2.8
+# - name: test stack
+#   docker_stack:
+#     name: stack1
+#       compose:
+#       - /opt/stack.compose
+#     state: present
+
+- name: check deploed
+  shell: docker service ls | grep  -oE '\flask-swarm_web'
+  ignore_errors: yes
+  register: check
+
+- debug:
+    var: check
+
+- name: Docker stack deploy Flask
+  shell: "docker stack deploy --compose-file /home/docker/flask/deploy-stack.yml flask-swarm"
+  register: out
+  when: check.stdout == ""
+
+- debug:
+    var: out
+

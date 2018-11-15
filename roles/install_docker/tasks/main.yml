@@ -1,0 +1,32 @@
+---
+- name: Install docker from repository
+  yum:
+    #name: [u'docker', u'docker-compose']
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - docker
+    - python-pip
+    - python-setuptools
+
+- name: Check pip config
+  template:
+    src: pip.conf.j2
+    dest: /etc/pip.conf
+
+- name: Upgrade pip
+  pip:
+    name: pip
+    state: latest
+
+- name: pip Install docker-compose
+  pip:
+    name:
+      - docker-compose
+    state: present
+
+- name: Enable docker on startup host
+  systemd:
+    name: docker
+    enabled: true
+    state: stopped
